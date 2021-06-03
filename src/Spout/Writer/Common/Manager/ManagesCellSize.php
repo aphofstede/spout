@@ -30,6 +30,14 @@ trait ManagesCellSize
     }
 
     /**
+     * Clear old column widths when we want to start new sheet
+     */
+    public function clearColumnWidths()
+    {
+        $this->columnWidths = [];
+    }
+
+    /**
      * @param float $width
      * @param array $columns One or more columns with this width
      */
