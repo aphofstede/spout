@@ -356,6 +356,17 @@ EOD;
         }
         $this->ensureSheetDataStated($worksheet);
         \fwrite($worksheetFilePointer, '</sheetData>');
+        // do something to merging cells
+        $mergeRanges = $worksheet->getExternalSheet()->getMergeRanges();
+        if (!empty($mergeRanges)) {
+            $startLine = '<mergeCells count="1">';
+            $rangeLine = '';
+            foreach ($mergeRanges as $key => $range) {
+                $rangeLine .= '<mergeCell ref="' . $range . '"/>';
+            }
+            $endLine = '</mergeCells>';
+            \fwrite($worksheetFilePointer, $startLine . $rangeLine . $endLine);
+        }
         \fwrite($worksheetFilePointer, '</worksheet>');
         \fclose($worksheetFilePointer);
     }
