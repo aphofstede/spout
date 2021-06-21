@@ -27,8 +27,8 @@ class Sheet
     /** @var SheetManager Sheet manager */
     private $sheetManager;
 
-    /** @var merge cell */
-    private $mergeRanges;
+    /** @var array merge cell */
+    private array $mergeRanges = [];
 
     /**
      * @param int $sheetIndex Index of the sheet, based on order in the workbook (zero-based)
@@ -113,7 +113,7 @@ class Sheet
     }
 
     /**
-     * @return merge
+     * @return array
      */
     public function getMergeRanges()
     {
@@ -121,11 +121,20 @@ class Sheet
     }
 
     /**
-     * @param $mergeRanges
-     * @return mixed
+     * @param array $mergeRanges
+     * @return array
      */
-    public function setMergeRanges($mergeRanges)
+    public function setMergeRanges(array $mergeRanges)
     {
         return $this->mergeRanges = $mergeRanges;
+    }
+
+    /**
+     * @param $mergeRanges
+     * @return array
+     */
+    public function addMergeRanges(string ...$mergeRanges)
+    {
+        return $this->mergeRanges = array_merge($this->mergeRanges, $mergeRanges);
     }
 }
