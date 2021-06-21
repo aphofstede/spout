@@ -2,6 +2,7 @@
 
 namespace Box\Spout\Writer\Common\Entity;
 
+use Box\Spout\Writer\Common\Helper\CellHelper;
 use Box\Spout\Writer\Common\Manager\SheetManager;
 
 /**
@@ -136,5 +137,23 @@ class Sheet
     public function addMergeRanges(string ...$mergeRanges)
     {
         return $this->mergeRanges = array_merge($this->mergeRanges, $mergeRanges);
+    }
+    
+    /**
+     * @param int $fromColumnIndexZeroBased
+     * @param int $fromRowIndexOneBased
+     * @param int $toColumnIndexZeroBased
+     * @param int $toRowIndexOneBased
+     * @return array
+     */
+    public function addMergeRangeByIndexes(
+        int $fromColumnIndexZeroBased,
+        int $fromRowIndexOneBased,
+        int $toColumnIndexZeroBased,
+        int $toRowIndexOneBased
+    ) {
+        $fromLetter = CellHelper::getColumnLettersFromColumnIndex($fromColumnIndexZeroBased);
+        $toLetter = CellHelper::getColumnLettersFromColumnIndex($toColumnIndexZeroBased);
+        return $this->addMergeRanges("{$fromLetter}{$fromRowIndexOneBased}:{$toLetter}{$toRowIndexOneBased}");
     }
 }
