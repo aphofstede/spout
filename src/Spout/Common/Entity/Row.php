@@ -6,6 +6,8 @@ use Box\Spout\Common\Entity\Style\Style;
 
 class Row
 {
+    public const DEFAULT_HEIGHT = 15;
+
     /**
      * The cells in this row
      * @var Cell[]
@@ -17,6 +19,18 @@ class Row
      * @var Style
      */
     protected $style;
+
+    /**
+     * Row height
+     * @var float
+     */
+    protected $height = self::DEFAULT_HEIGHT;
+
+    /**
+     * Whether the height property was set
+     * @var bool
+     */
+    protected $hasSetHeight = false;
 
     /**
      * Row constructor.
@@ -125,5 +139,35 @@ class Row
         return \array_map(function (Cell $cell) {
             return $cell->getValue();
         }, $this->cells);
+    }
+
+    /**
+     * Set row height
+     * @param float $height
+     * @return Row
+     */
+    public function setHeight($height)
+    {
+        $this->height = $height;
+        $this->hasSetHeight = (bool)$height;
+
+        return $this;
+    }
+
+    /**
+     * Returns row height
+     * @return float
+     */
+    public function getHeight()
+    {
+        return $this->height;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasSetHeight(): bool
+    {
+        return $this->hasSetHeight;
     }
 }

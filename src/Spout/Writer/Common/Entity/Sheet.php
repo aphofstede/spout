@@ -2,6 +2,7 @@
 
 namespace Box\Spout\Writer\Common\Entity;
 
+use Box\Spout\Writer\Common\Helper\CellHelper;
 use Box\Spout\Writer\Common\Manager\SheetManager;
 
 /**
@@ -26,6 +27,9 @@ class Sheet
 
     /** @var SheetManager Sheet manager */
     private $sheetManager;
+
+    /** @var array merge cell */
+    private array $mergeRanges = [];
 
     /**
      * @param int $sheetIndex Index of the sheet, based on order in the workbook (zero-based)
@@ -107,5 +111,49 @@ class Sheet
         $this->isVisible = $isVisible;
 
         return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getMergeRanges()
+    {
+        return $this->mergeRanges;
+    }
+
+    /**
+     * @param array $mergeRanges
+     * @return array
+     */
+    public function setMergeRanges(array $mergeRanges)
+    {
+        return $this->mergeRanges = $mergeRanges;
+    }
+
+    /**
+     * @param $mergeRanges
+     * @return array
+     */
+    public function addMergeRanges(string ...$mergeRanges)
+    {
+        return $this->mergeRanges = array_merge($this->mergeRanges, $mergeRanges);
+    }
+    
+    /**
+     * @param int $fromColumnIndexZeroBased
+     * @param int $fromRowIndexOneBased
+     * @param int $toColumnIndexZeroBased
+     * @param int $toRowIndexOneBased
+     * @return array
+     */
+    public function addMergeRangeByIndexes(
+        int $fromColumnIndexZeroBased,
+        int $fromRowIndexOneBased,
+        int $toColumnIndexZeroBased,
+        int $toRowIndexOneBased
+    ) {
+        $fromLetter = CellHelper::getColumnLettersFromColumnIndex($fromColumnIndexZeroBased);
+        $toLetter = CellHelper::getColumnLettersFromColumnIndex($toColumnIndexZeroBased);
+        return $this->addMergeRanges("{$fromLetter}{$fromRowIndexOneBased}:{$toLetter}{$toRowIndexOneBased}");
     }
 }

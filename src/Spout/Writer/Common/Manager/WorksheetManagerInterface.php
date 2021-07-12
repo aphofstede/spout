@@ -22,6 +22,11 @@ interface WorksheetManagerInterface
     public function setDefaultRowHeight($height);
 
     /**
+     * Clear old column widths when we want to start new sheet
+     */
+    public function clearColumnWidths();
+
+    /**
      * @param float $width
      * @param array $columns One or more columns with this width
      */

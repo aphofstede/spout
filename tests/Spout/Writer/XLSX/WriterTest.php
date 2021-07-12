@@ -7,6 +7,7 @@ use Box\Spout\Common\Entity\Row;
 use Box\Spout\Common\Exception\InvalidArgumentException;
 use Box\Spout\Common\Exception\IOException;
 use Box\Spout\Common\Exception\SpoutException;
+use Box\Spout\Reader\Wrapper\XMLReader;
 use Box\Spout\TestUsingResource;
 use Box\Spout\Writer\Common\Creator\WriterEntityFactory;
 use Box\Spout\Writer\Exception\WriterAlreadyOpenedException;
@@ -566,6 +567,48 @@ class WriterTest extends TestCase
     /**
      * @return void
      */
+    public function testAddRowShouldSupportRowHeights()
+    {
+        $fileName = 'test_add_row_should_support_row_heights.xlsx';
+        $dataRows = $this->createRowsFromValues([
+            ['First row with default height'],
+            ['Second row with custom height'],
+        ]);
+
+        $dataRows[1]->setHeight('23');
+
+        $this->writeToXLSXFile($dataRows, $fileName);
+        $firstRow = $this->getXmlRowFromXmlFile($fileName, 1, 1);
+        $secondRow = $this->getXmlRowFromXmlFile($fileName, 1, 2);
+        $this->assertEquals('15', $firstRow->getAttribute('ht'), '1st row does not have default height.');
+        $this->assertEquals('23', $secondRow->getAttribute('ht'), '2nd row does not have custom height.');
+    }
+
+    /**
+     * @return void
+     */
+    public function testGeneratedFileShouldBeValidForEmptySheets()
+    {
+        $fileName = 'test_empty_sheet.xlsx';
+        $this->createGeneratedFolderIfNeeded($fileName);
+        $resourcePath = $this->getGeneratedResourcePath($fileName);
+        $writer = WriterEntityFactory::createXLSXWriter();
+        $writer->openToFile($resourcePath);
+
+        $writer->addNewSheetAndMakeItCurrent();
+        $writer->close();
+
+        $xmlReader = $this->getXmlReaderForSheetFromXmlFile($fileName, 1);
+        $xmlReader->setParserProperty(XMLReader::VALIDATE, true);
+        $this->assertTrue($xmlReader->isValid(), 'worksheet xml is not valid');
+        $xmlReader->setParserProperty(XMLReader::VALIDATE, false);
+        $xmlReader->readUntilNodeFound('sheetData');
+        $this->assertEquals('sheetData', $xmlReader->getCurrentNodeName(), 'worksheet xml does not have sheetData');
+    }
+
+    /**
+     * @return void
+     */
     public function testGeneratedFileShouldHaveTheCorrectMimeType()
     {
         $fileName = 'test_mime_type.xlsx';
@@ -676,5 +719,43 @@ class WriterTest extends TestCase
         $xmlContents = file_get_contents('zip://' . $pathToSharedStringsFile);
 
         $this->assertStringContainsString($sharedString, $xmlContents, $message);
+    }
+
+    /**
+     * @param $fileName
+     * @param $sheetIndex - 1 based
+     * @return XMLReader
+     */
+    private function getXmlReaderForSheetFromXmlFile($fileName, $sheetIndex)
+    {
+        $resourcePath = $this->getGeneratedResourcePath($fileName);
+
+        $xmlReader = new XMLReader();
+        $xmlReader->openFileInZip($resourcePath, 'xl/worksheets/sheet' . $sheetIndex . '.xml');
+
+        return $xmlReader;
+    }
+
+    /**
+     * @param $fileName
+     * @param $sheetIndex - 1 based
+     * @param $rowIndex - 1 based
+     * @throws \Box\Spout\Reader\Exception\XMLProcessingException
+     * @return \DOMNode|null
+     */
+    private function getXmlRowFromXmlFile($fileName, $sheetIndex, $rowIndex)
+    {
+        $xmlReader = $this->getXmlReaderForSheetFromXmlFile($fileName, $sheetIndex);
+        $xmlReader->readUntilNodeFound('sheetData');
+
+        for ($i = 0; $i < $rowIndex; $i++) {
+            $xmlReader->readUntilNodeFound('row');
+        }
+
+        $row = $xmlReader->expand();
+
+        $xmlReader->close();
+
+        return $row;
     }
 }

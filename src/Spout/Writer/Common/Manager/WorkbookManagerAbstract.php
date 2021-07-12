@@ -304,6 +304,14 @@ abstract class WorkbookManagerAbstract implements WorkbookManagerInterface
     }
 
     /**
+     * Clear old column widths when we want to start new sheet
+     */
+    public function clearColumnWidths()
+    {
+        $this->worksheetManager->clearColumnWidths();
+    }
+
+    /**
      * @param float $width
      * @param array $columns One or more columns with this width
      */

@@ -181,9 +181,11 @@ EOD;
         $rowStyle = $row->getStyle();
         $rowIndexOneBased = $worksheet->getLastWrittenRowIndex() + 1;
         $numCells = $row->getNumCells();
+        $hasSetRowHeight = $row->hasSetHeight();
 
-        $hasCustomHeight = $this->defaultRowHeight > 0 ? '1' : '0';
-        $rowXML = "<row r=\"{$rowIndexOneBased}\" spans=\"1:{$numCells}\" customHeight=\"{$hasCustomHeight}\">";
+        $customHeight = $hasSetRowHeight || $this->defaultRowHeight > 0 ? 'customHeight="1"' : '';
+        $rowHeight = $hasSetRowHeight ? "ht=\"{$row->getHeight()}\"" : '';
+        $rowXML = "<row r=\"{$rowIndexOneBased}\" spans=\"1:{$numCells}\" $customHeight $rowHeight>";
 
         foreach ($row->getCells() as $columnIndexZeroBased => $cell) {
             $registeredStyle = $this->applyStyleAndRegister($cell, $rowStyle);
@@ -356,6 +358,17 @@ EOD;
         }
         $this->ensureSheetDataStated($worksheet);
         \fwrite($worksheetFilePointer, '</sheetData>');
+        // do something to merging cells
+        $mergeRanges = $worksheet->getExternalSheet()->getMergeRanges();
+        if (!empty($mergeRanges)) {
+            $startLine = '<mergeCells count="1">';
+            $rangeLine = '';
+            foreach ($mergeRanges as $key => $range) {
+                $rangeLine .= '<mergeCell ref="' . $range . '"/>';
+            }
+            $endLine = '</mergeCells>';
+            \fwrite($worksheetFilePointer, $startLine . $rangeLine . $endLine);
+        }
         \fwrite($worksheetFilePointer, '</worksheet>');
         \fclose($worksheetFilePointer);
     }

@@ -283,6 +283,14 @@ class WorksheetManager implements WorksheetManagerInterface
     }
 
     /**
+     * Clear old column widths when we want to start new sheet
+     */
+    public function clearColumnWidths()
+    {
+        $this->styleManager->clearColumnWidths();
+    }
+
+    /**
      * @param float $width
      * @param array $columns One or more columns with this width
      */

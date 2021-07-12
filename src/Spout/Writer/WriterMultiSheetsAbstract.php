@@ -167,6 +167,15 @@ abstract class WriterMultiSheetsAbstract extends WriterAbstract
     }
 
     /**
+     * Clear old column widths when we want to start new sheet
+     */
+    public function clearColumnWidths()
+    {
+        $this->throwIfWorkbookIsNotAvailable();
+        $this->workbookManager->clearColumnWidths();
+    }
+
+    /**
      * @param float|null $width
      * @param array $columns One or more columns with this width
      * @throws WriterNotOpenedException
